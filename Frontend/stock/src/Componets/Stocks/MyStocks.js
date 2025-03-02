@@ -14,7 +14,7 @@ const MyStocks = () => {
     //fetch lot data from database
     const fetchTrades = async () => {
       try {
-        const response = await fetch("https://stock-exchange-backend.onrender.com/api/v1/Lots");
+        const response =await fetch("https://stock-exchange-backend.onrender.com/api/v1/Lots");
         if (!response.ok) {
           throw new Error("Failed to fetch trades");
         }
@@ -63,6 +63,10 @@ const MyStocks = () => {
       return;
     }
     const stock = stocks.filter((s) => s.symbol === symbol)[0];
+    if(!stock){
+      alert("Please Enter valid data")
+      return
+    }
 
     const realized_amt = stock.price * quantity;
 
@@ -157,7 +161,7 @@ const MyStocks = () => {
               id="symbol"
               placeholder="Enter Symbol"
               value={symbol}
-              onChange={(e) => setSymbol(e.target.value)}
+              onChange={(e) => setSymbol(e.target.value.toUpperCase())}
             />
           </div>
           <div>

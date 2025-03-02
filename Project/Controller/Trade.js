@@ -22,7 +22,6 @@ res.status(201).json({
 exports.getdata=async (req, res) => {
     try {
       const trades = await LOT.find();
-     console.log(trades)
       res.status(200).json({
         success: true,
         data: trades,
@@ -40,7 +39,7 @@ exports.getdata=async (req, res) => {
   //update realized lot data.
   exports.sellstock=async(req,res)=>{
     try {
-      const { symbol, sell_quantity, method,remain_qty,} = req.body;
+      const { symbol, sell_quantity, method} = req.body;
   
       if (!symbol || !sell_quantity || !method) {
         return res.status(400).json({ success: false, msg: "All fields are required" });
@@ -50,7 +49,23 @@ exports.getdata=async (req, res) => {
       if (isNaN(sell_quantity)) {
         return res.status(400).json({ success: false, msg: "Invalid sell_quantity" });
       }
-  
+      const stockExists = await LOT.findOne({ symbol });
+        if (!stockExists) {
+          return res.status(404).json({ success: false, msg: `Stock symbol '${symbol}' not found` });
+        }
+        const lotqty= await LOT.find({ symbol, lot_status: { $ne: "FULLY REALIZED" } })
+
+        if (lotqty.length === 0) {
+          return res.status(404).json({ success: false, msg: `Stock symbol '${symbol}' not found or fully realized.` });
+        }
+        const totalAvailableStock = lotqty.reduce((total, lot) => total + (lot.quantity - lot.realized_quantity), 0);
+        
+        if (sell_quantity > totalAvailableStock) {
+          return res.status(400).json({
+            success: false,
+            msg: `Not enough stock available. You have ${totalAvailableStock} available but tried to sell ${sell_quantity}.`
+          });
+        }
       let remaining_quantity = parseFloat(sell_quantity); // Convert to number
   
       let lots; //Initialize lots variable 
@@ -64,21 +79,18 @@ exports.getdata=async (req, res) => {
       } else {
         return res.status(400).json({ success: false, msg: "Invalid method" });
       }
-  
       for (const lot of lots) {
         if (remaining_quantity <= 0) break;
-        
         // Calculate available quantity in the lot
         const available_quantity = lot.quantity - lot.realized_quantity;
-        console.log("Available Quantity in Lot:", available_quantity);
+  
         if (available_quantity <= 0) continue;
 
         const used_quantity = Math.min(remaining_quantity, available_quantity);
-        console.log("Used Quantity from Lot:", used_quantity);
-        
+
         lot.realized_quantity += used_quantity;
         remaining_quantity -= used_quantity;
-        console.log("Updated Remaining Quantity to Sell:", remaining_quantity);
+
         
             if (lot.realized_quantity === lot.quantity) {
               lot.lot_status = "FULLY REALIZED"; 
@@ -104,6 +116,7 @@ exports.getdata=async (req, res) => {
   //Delete  lot data.
   exports.Delete=async(req,res)=>{
     try {
+   
       const { id } = req.params; 
       const result = await LOT.findByIdAndDelete(id);
   
@@ -117,4 +130,3 @@ exports.getdata=async (req, res) => {
       res.status(500).json({ success: false, msg: "Server error" });
     }
   }
-  
