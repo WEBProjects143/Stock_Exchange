@@ -5,7 +5,7 @@ const {CreateTrade,getdata,sellstock,Delete}=require("./Controller/Trade")
 const app=express();
 
 //Middleware
-const corsOption={"origin": "https://stock-exchange-frontend.onrender.com", "methods": "GET,HEAD,PUT,PATCH,POST,DELETE","preflightContinue": false,"optionsSuccessStatus": 204}
+const corsOption={"origin": "https://stock-exchange-frontend.onrender.com", "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",credentials: true}
 app.use(cors(corsOption));
 app.use(express.json())
 
