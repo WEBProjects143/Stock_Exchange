@@ -1,0 +1,122 @@
+.stocks-container {
+    width: 50%;
+    margin: auto;
+    text-align: center;
+  
+  }
+  
+  h1 {
+    color: #333;
+  }
+  
+  .stocks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    display: block;
+    height:50vh; /* Adjust as needed */
+    overflow-y: auto;
+  }
+  
+  .stocks-table th, .stocks-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+  }
+  
+  .stocks-table th {
+    background-color: #f4f4f4;
+  }
+  
+  .buy-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+  }
+  .Del-btn{
+    background-color: #d3473b;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+  }
+  
+  .sell-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+  }
+  
+  .buy-btn:hover {
+    background-color: #218838;
+  }
+  
+  .sell-btn:hover {
+    background-color: #c82333;
+  }
+  .quantity{
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    margin-right: 10px;
+  }
+  /* tbody {
+    display: block;
+    height: 250px; /* Adjust as needed */
+    /* overflow-y: auto;
+  } */
+   /* Container for the form */
+.sell-stock-form {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Form heading */
+.sell-stock-form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Form group (label + input) */
+.form-group {
+  margin-bottom: 15px;
+}
+
+/* Label styling */
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #555;
+}
+
+/* Input field styling */
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+/* Input field focus state */
+.form-group input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+   
