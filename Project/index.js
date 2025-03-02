@@ -24,6 +24,6 @@ app.delete("/api/v1/delete/:id",Delete)
 const DBConnection=require("./Db/Db");
 
 app.listen(5000,async()=>{
-    DBConnection()
+    DBConnection();
     console.log("Server created.....")
 })
