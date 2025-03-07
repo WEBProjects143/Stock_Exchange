@@ -29,6 +29,7 @@ const Stocks = () => {
   const handleSubmit = async (stockId) => {
     const stock = stocks.find((s) => s.id === stockId); // Find the selected stock
     const stockDetails = {
+      userId:"67c464ff0c0f6bb2165e93c8",
       id: stock.id,
       name: stock.name,
       symbol: stock.symbol,
@@ -92,7 +93,12 @@ const Stocks = () => {
                   onChange={(e) => handleQuantity(stock.id, e)}
                 >
                   <option value="">Quantity</option>
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="30">30</option>
+                  <option value="40">40</option>
                   <option value="50">50</option>
+                  <option value="70">70</option>
                   <option value="100">100</option>
                   <option value="200">200</option>
                 </select>

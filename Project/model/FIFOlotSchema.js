@@ -10,8 +10,8 @@ const FIFOlotSchema = new mongoose.Schema({
     default:()=>uuidv4()// Generate random Id
   },
   trade_id: {
-    type: String,
-    required: true,
+    type:String,
+    required:true // Generate random Id
   },
   quantity: {
     type: Number,
@@ -45,6 +45,10 @@ const FIFOlotSchema = new mongoose.Schema({
     enum: ["OPEN", "PARTIALLY REALIZED", "FULLY REALIZED"],
     default: "OPEN",
   },
+  userId: {
+    type:String,
+    required: true,
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Lot", FIFOlotSchema);

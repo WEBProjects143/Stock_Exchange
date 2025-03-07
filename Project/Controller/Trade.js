@@ -1,30 +1,49 @@
-const Trademodel=require("../model/StockSchema");
-const LOT=require("../model/FIFOlotSchema");
+const {client} = require("../Db/Pg")
 
 //Insert stock data to the Trademodel database;
 exports.CreateTrade=async(req,res)=>{
-const {name,symbol,price,broker,quantity,amount}=req.body;
-const user=await Trademodel.create({name,symbol,quantity,broker,price,amount});
+const {userId,name,symbol,price,broker,quantity}=req.body;
 if (!name || !symbol || !price || !broker || !quantity) {
-    return res.status(400).json({
-      success: false,
-      msg: "All fields are required",
-    });
-  }
+  return res.status(400).json({
+    success: false,
+    msg: "All fields are required",
+  });
+}
+  const insertTradeQuery = `
+  INSERT INTO trade (stock_name, quantity, broker_name, price,user_id,symbol)
+  VALUES ($1, $2, $3, $4, $5, $6)
+  RETURNING *;
+  `;
+  const tradeValues = [ name,Number(quantity),broker,price,userId,symbol];
+  const tradeRes = await client.query(insertTradeQuery, tradeValues);
+
+  const lotQuery = `INSERT INTO lot (trade_id, lot_quantity, realized_quantity, realized_trade_id, lot_status, user_id,symbol)
+    VALUES ($1, $2, $3, $4, $5, $6,$7)
+    RETURNING *;
+`;
+  const lotValues = [ tradeRes.rows[0].trade_id,tradeRes.rows[0].quantity,0,null,'OPEN',tradeRes.rows[0].user_id,tradeRes.rows[0].symbol];
+  const lotRes = await client.query(lotQuery, lotValues);
+console.log(tradeRes.rows[0].trade_id)
 res.status(201).json({
     sucess:true,
     msg:"data submitted  successfully",
-    user
+    tradeRes,
+    lotRes
 })
 };
 
 //Fetch lot data;
 exports.getdata=async (req, res) => {
     try {
-      const trades = await LOT.find();
+      const selectQuery = 'SELECT * FROM lot';
+      const result = await client.query(selectQuery);
+     const data=result.rows
+     console.log(data)
+
       res.status(200).json({
         success: true,
-        data: trades,
+        message: "successfull fetch Lot data",
+        data    
       });
     } catch (error) {
       console.error("Error fetching trades:", error);
@@ -36,97 +55,157 @@ exports.getdata=async (req, res) => {
     }
   };
 
-  //update realized lot data.
-  exports.sellstock=async(req,res)=>{
+//Fetch trade data;
+ exports.getTrades=async (req, res) => {
     try {
-      const { symbol, sell_quantity, method} = req.body;
-  
-      if (!symbol || !sell_quantity || !method) {
-        return res.status(400).json({ success: false, msg: "All fields are required" });
-      }
-  
-      // Ensure sell_quantity is a valid number
-      if (isNaN(sell_quantity)) {
-        return res.status(400).json({ success: false, msg: "Invalid sell_quantity" });
-      }
-      const stockExists = await LOT.findOne({ symbol });
-        if (!stockExists) {
-          return res.status(404).json({ success: false, msg: `Stock symbol '${symbol}' not found` });
-        }
-        const lotqty= await LOT.find({ symbol, lot_status: { $ne: "FULLY REALIZED" } })
+      const selectQuery = 'SELECT * FROM trade';
+      const result = await client.query(selectQuery);
+     const data=result.rows
 
-        if (lotqty.length === 0) {
-          return res.status(404).json({ success: false, msg: `Stock symbol '${symbol}' not found or fully realized.` });
-        }
-        const totalAvailableStock = lotqty.reduce((total, lot) => total + (lot.quantity - lot.realized_quantity), 0);
-        
-        if (sell_quantity > totalAvailableStock) {
+      res.status(200).json({
+        success: true,
+        message: "successfull fetch Lot data",
+        data    
+      });
+    } catch (error) {
+      console.error("Error fetching trades:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch trades",
+        error: error.message,
+      });
+    }
+  }
+  
+  //Sell realized lot data.
+  exports.sellstock = async (req, res) => {
+    try {
+      const { trade_id, name, quantity, broker, price, userId, symbol,method } = req.body;
+  
+      let lotsellquery;
+     // query for LIFO AND FIFO
+    if (method === 'LIFO') {
+      lotsellquery = `
+        SELECT * FROM lot
+        WHERE symbol = $1 AND lot_status IN ('OPEN', 'PARTIALLY REALIZED')
+        ORDER BY timestamp ASC
+      `;
+    } else if (method === 'FIFO') {
+      lotsellquery = `
+        SELECT * FROM lot
+        WHERE symbol = $1 AND lot_status IN ('OPEN', 'PARTIALLY REALIZED')
+        ORDER BY timestamp DESC
+      `;
+    } else {
+      return res.status(400).json({
+        success: false,
+        msg: "Invalid method specified. Use 'LIFO' or 'FIFO'."
+      });
+    }
+
+    const sellotValues = [symbol];
+    const lotRes = await client.query(lotsellquery, sellotValues);
+    const lotval = lotRes.rows;
+  
+      //  Handle remaining quantity to sell 
+      let remainingQuantity = Number(quantity) * -1;
+  
+      let isError = false;
+  
+      for (let i = 0; i < lotval.length; i++) {
+        const lot = lotval[i];
+  
+        // Check if the lot is fully realized 
+        if (lot.lot_status === 'FULLY REALIZED') {
+          // Log the alert and mark as error
+          console.log(`ALERT: Lot ${lot.lot_id} is fully realized. Cannot sell from it.`);
+          isError = true;
+  
           return res.status(400).json({
             success: false,
-            msg: `Not enough stock available. You have ${totalAvailableStock} available but tried to sell ${sell_quantity}.`
+            msg: `Lot ${lot.lot_id} is fully realized. You cannot sell from it.`
+          });
+        }else{
+  
+        const availableQuantity = lot.lot_quantity - lot.realized_quantity;
+  
+        //  if remaining quantity exceeds available quantity
+        if (remainingQuantity > availableQuantity) {
+          console.log(`ALERT: Attempt to sell more than available in Lot ${lot.lot_id}. Available: ${availableQuantity}, Attempted to sell: ${remainingQuantity}`);
+          isError = true;
+  
+          return res.status(400).json({
+            success: false,
+            msg: `Not enough quantity in Lot ${lot.lot_id}. Available: ${availableQuantity}, Attempted to sell: ${remainingQuantity}`
           });
         }
-      let remaining_quantity = parseFloat(sell_quantity); // Convert to number
   
-      let lots; //Initialize lots variable 
-      if (method === "FIFO") {
-        lots = await LOT.find({ symbol, lot_status: { $ne: "FULLY REALIZED" } })// FIFO: Sort by createdAt
-          .sort({ createdAt: 1 });
-      } else if (method === "LIFO") {
+        // Calculate the quantity to realize from this lot
+        const realizeQuantity = Math.min(availableQuantity, remainingQuantity);
+  
+        // Update the lot's realized quantity and trade ID
+        lot.realized_quantity += realizeQuantity;
+        lot.realized_trade_id = trade_id;
+  
+        // Update the lot status based on realized quantity
+        if (lot.realized_quantity === lot.lot_quantity) {
+          lot.lot_status = 'FULLY REALIZED';
+        } else{
+          lot.lot_status = 'PARTIALLY REALIZED';
+        } 
 
-        lots = await LOT.find({ symbol, lot_status: { $ne: "FULLY REALIZED" } })// LIFO: Sort by createdAt
-          .sort({ createdAt: -1 });
-      } else {
-        return res.status(400).json({ success: false, msg: "Invalid method" });
+        // Decrease remaining quantity
+        remainingQuantity -= realizeQuantity;
+  
+        // Update the lot in the database
+        const updateLotQuery = `
+          UPDATE lot
+          SET realized_quantity = $1, realized_trade_id = $2, lot_status = $3
+          WHERE lot_id = $4
+          RETURNING *;
+        `;
+        await client.query(updateLotQuery, [lot.realized_quantity, trade_id, lot.lot_status, lot.lot_id]);
+  
+        // If remainingQuantity reaches 0, stop the loop
+        if (remainingQuantity === 0) {
+          break;
+        }}
       }
-      for (const lot of lots) {
-        if (remaining_quantity <= 0) break;
-        // Calculate available quantity in the lot
-        const available_quantity = lot.quantity - lot.realized_quantity;
   
-        if (available_quantity <= 0) continue;
+      if (isError) {
+        return;
+      }
 
-        const used_quantity = Math.min(remaining_quantity, available_quantity);
-
-        lot.realized_quantity += used_quantity;
-        remaining_quantity -= used_quantity;
-
+      const lotsellcheck = `
+        SELECT * FROM lot
+        WHERE symbol = $1 
+        ORDER BY timestamp DESC;
+      `;
+      const lotValues = [symbol];
+      const reslot = await client.query(lotsellcheck, lotValues);
+      const lotcheck = reslot.rows[0];
+  
+      // checking lot status
+      if(lotcheck.lot_status==="FULLY REALIZED"){
         
-            if (lot.realized_quantity === lot.quantity) {
-              lot.lot_status = "FULLY REALIZED"; 
-          } else if (lot.realized_quantity > 0) {
-              lot.lot_status = "PARTIALLY REALIZED";
-          } else {
-              lot.lot_status = "OPEN";
-          }
-  
-        await lot.save();
+        res.status(500).json({ success: false, msg: "Data not inserted" });
+      }else{ 
+      //  Insert the trade record after lot updates
+        const insertTradeQuery = `
+          INSERT INTO trade (stock_name, quantity, broker_name, price, user_id, symbol)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          RETURNING *;
+        `;
+        const seltradeValues = [name, Number(quantity), broker, price, userId, symbol];
+        const seleRes = await client.query(insertTradeQuery, seltradeValues);
+    
+        res.status(200).json({ success: true, msg: 'Sold successfully' });
       }
-      if (remaining_quantity > 0) {
-        return res.status(400).json({ success: false, msg: "Not enough stock to sell" });
-      }
   
-      res.status(200).json({ success: true, msg: `Stock sold using ${method} method` });
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, msg: "Server error" });
     }
   };
   
-  //Delete  lot data.
-  exports.Delete=async(req,res)=>{
-    try {
-   
-      const { id } = req.params; 
-      const result = await LOT.findByIdAndDelete(id);
   
-      if (!result) {
-        return res.status(404).json({ success: false, msg: "Lot not found" });
-      }
-  
-      res.status(200).json({ success: true, msg: "Lot deleted successfully" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, msg: "Server error" });
-    }
-  }
