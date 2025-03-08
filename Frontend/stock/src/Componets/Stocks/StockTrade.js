@@ -14,7 +14,7 @@ const TradeStocks = () => {
     // Fetch trade data from database
     const fetchTrades = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/v1/getTrades");
+        const response = await fetch("https://stock-exchange-backend.onrender.com/api/v1/getTrades");
         if (!response.ok) {
           throw new Error("Failed to fetch trades");
         }
@@ -49,7 +49,7 @@ const TradeStocks = () => {
         method:method
     }
     try {
-      const response = await fetch("http://localhost:5000/api/v1/sellstock", {
+      const response = await fetch("https://stock-exchange-backend.onrender.com/api/v1/sellstock", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

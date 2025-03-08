@@ -40,7 +40,7 @@ const Stocks = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/v1/create", {
+      const response = await fetch("https://stock-exchange-backend.onrender.com/api/v1/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
