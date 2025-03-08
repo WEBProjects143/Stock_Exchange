@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express=require("express");
 const cors=require("cors")
-const {CreateTrade,getdata,sellstock,Delete,getTrades}=require("./Controller/Trade")
+const {CreateTrade,getdata,sellstock,getTrades}=require("./Controller/Trade")
 const app=express();
 
 //Middleware
