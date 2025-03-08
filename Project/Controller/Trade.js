@@ -88,13 +88,13 @@ exports.getdata=async (req, res) => {
       lotsellquery = `
         SELECT * FROM lot
         WHERE symbol = $1 AND lot_status IN ('OPEN', 'PARTIALLY REALIZED')
-        ORDER BY timestamp ASC
+        ORDER BY timestamp DESC
       `;
     } else if (method === 'FIFO') {
       lotsellquery = `
         SELECT * FROM lot
         WHERE symbol = $1 AND lot_status IN ('OPEN', 'PARTIALLY REALIZED')
-        ORDER BY timestamp DESC
+        ORDER BY timestamp ASC
       `;
     } else {
       return res.status(400).json({
