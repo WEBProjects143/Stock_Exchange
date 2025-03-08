@@ -81,6 +81,34 @@ exports.getdata=async (req, res) => {
   exports.sellstock = async (req, res) => {
     try {
       const { trade_id, name, quantity, broker, price, userId, symbol,method } = req.body;
+
+      const lotsellcheck = `
+      SELECT * FROM lot
+      WHERE symbol = $1 
+      ORDER BY timestamp DESC;
+    `;
+    const lotValues = [symbol];
+    const reslot = await client.query(lotsellcheck, lotValues);
+    const lotcheck = reslot.rows[0];
+
+    
+
+    // checking lot status
+    if(lotcheck.lot_quantity===lotcheck.realized_quantity){
+      
+      res.status(500).json({ success: false, msg: "Data not inserted" });
+    }else{ 
+    //  Insert the trade record after lot updates
+      const insertTradeQuery = `
+        INSERT INTO trade (stock_name, quantity, broker_name, price, user_id, symbol)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *;
+      `;
+      const seltradeValues = [name, Number(quantity), broker, price, userId, symbol];
+      const seleRes = await client.query(insertTradeQuery, seltradeValues);
+  
+      res.status(200).json({ success: true, msg: 'Sold successfully' });
+    }
   
       let lotsellquery;
      // query for LIFO AND FIFO
@@ -112,7 +140,6 @@ exports.getdata=async (req, res) => {
       let remainingQuantity = Number(quantity) * -1;
   
       let isError = false;
-      let lastLotUpdated = false;
   
       for (let i = 0; i < lotval.length; i++) {
         const lot = lotval[i];
@@ -169,9 +196,7 @@ exports.getdata=async (req, res) => {
         await client.query(updateLotQuery, [lot.realized_quantity, trade_id, lot.lot_status, lot.lot_id]);
   
         // If remainingQuantity reaches 0, stop the loop
-
         if (remainingQuantity === 0) {
-          lastLotUpdated = true; 
           break;
         }}
       }
@@ -180,43 +205,7 @@ exports.getdata=async (req, res) => {
         return;
       }
 
-      const lotsellcheck = `
-        SELECT * FROM lot
-        WHERE symbol = $1 
-        ORDER BY timestamp DESC;
-      `;
-      const lotValues = [symbol];
-      const reslot = await client.query(lotsellcheck, lotValues);
-      const lotcheck = reslot.rows[0];
-
-      
-  
-      // checking lot status
-      if(lotcheck.lot_quantity===lotcheck.realized_quantity){
-        
-        res.status(500).json({ success: false, msg: "Data not inserted" });
-      }else{ 
-      //  Insert the trade record after lot updates
-      if (lastLotUpdated) {
-        const insertTradeQuery = `
-          INSERT INTO trade (stock_name, quantity, broker_name, price, user_id, symbol)
-          VALUES ($1, $2, $3, $4, $5, $6)
-          RETURNING *;
-        `;
-          const seltradeValues = [name, Number(quantity), broker, price, userId, symbol];
-          const seleRes = await client.query(insertTradeQuery, seltradeValues);
-        
-        res.status(200).json({ success: true, msg: 'Sold successfully' });
-
-      }else{
-        res.status(500).json({
-          success: false,
-          msg: "Transaction did not complete properly."
-        });
-
-      }
-    }
-      
+     
   
     } catch (error) {
       res.status(500).json({ success: false, msg: "Server error" });
