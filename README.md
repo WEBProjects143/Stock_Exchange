@@ -10,12 +10,8 @@ Enter the desired quantity of stocks you want to buy in the provided input field
 Click on the "Buy" button to proceed.
 Once you click "Buy," you will be redirected to the Lot Page.
 **
-**3. Lot Page - View Purchased Stocks****
-The Lot Page shows all the stocks you have purchased, including:
-Stock name
-Quantity
-Purchase price
-Here, you can view the stocks in your portfolio and their details.
+**3. Lot Page - View lot ****
+The Lot Page shows all the lots you have purchased
 
 **4. Trades Page - Sell Purchased Stocks**
 Next, navigate to the Trades Page where you can manage your stock trades.
