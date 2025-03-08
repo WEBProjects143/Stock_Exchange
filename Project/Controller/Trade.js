@@ -99,6 +99,7 @@ exports.getdata=async (req, res) => {
     } else {
       return res.status(400).json({
         success: false,
+        error:error,
         msg: "Invalid method specified. Use 'LIFO' or 'FIFO'."
       });
     }
@@ -184,8 +185,12 @@ exports.getdata=async (req, res) => {
       const lotValues = [symbol];
       const reslot = await client.query(lotsellcheck, lotValues);
       const lotcheck = reslot.rows[0];
-
   
+      // checking lot status
+      if(lotcheck.lot_quantity===lotcheck.realized_quantity){
+        
+        res.status(500).json({ success: false, msg: "Data not inserted" });
+      }else{ 
       //  Insert the trade record after lot updates
         const insertTradeQuery = `
           INSERT INTO trade (stock_name, quantity, broker_name, price, user_id, symbol)
@@ -196,9 +201,9 @@ exports.getdata=async (req, res) => {
         const seleRes = await client.query(insertTradeQuery, seltradeValues);
     
         res.status(200).json({ success: true, msg: 'Sold successfully' });
+      }
   
     } catch (error) {
-      console.error(error);
       res.status(500).json({ success: false, msg: "Server error" });
     }
   };

@@ -7,7 +7,7 @@ import "./StockTrade.css";
 const TradeStocks = () => {
   const [stocks, setStocks] = useState([]);
   const [quantity, setQuantity] = useState();
-   const [method, setMethod] = useState(null);
+   const [method, setMethod] = useState("FIFO");
 
 
   useEffect(() => {
