@@ -1,11 +1,16 @@
 
 const { Client } = require('pg');
+require("dotenv").config()
+
     const client = new Client({
-        user: 'postgres',       
-        host: 'localhost',     
-        database: 'Bhupendra', 
-        password: '1234',
-        port: 5432,
+        user: process.env.user,       
+        host: process.env.host,     
+        database: process.env.database, 
+        password: process.env.password,
+        port: process.env.port,
+        ssl: {
+          rejectUnauthorized: false,  // Allows the connection even if the certificate is self-signed
+        }
       });
       const connectDb = async () => {
         try {
