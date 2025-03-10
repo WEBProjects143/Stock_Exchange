@@ -92,8 +92,17 @@ exports.getdata=async (req, res) => {
     const lotcheck = reslot.rows[0];
 
     
-
-    // checking lot status
+     //  if remaining quantity exceeds available quantity
+        if (remainingQuantity > availableQuantity) {
+          console.log(`ALERT: Attempt to sell more than available in Lot ${lot.lot_id}. Available: ${availableQuantity}, Attempted to sell: ${remainingQuantity}`);
+          isError = true;
+          
+          return res.status(400).json({
+            success: false,
+            msg: `Not enough quantity in Lot ${lot.lot_id}. Available: ${availableQuantity}, Attempted to sell: ${remainingQuantity}`
+          });
+        }else{
+           // checking lot status
     if(lotcheck.lot_quantity===lotcheck.realized_quantity){
       
       res.status(500).json({ success: false, msg: "Data not inserted" });
@@ -108,8 +117,25 @@ exports.getdata=async (req, res) => {
       const seleRes = await client.query(insertTradeQuery, seltradeValues);
   
       res.status(200).json({ success: true, msg: 'Sold successfully' });
-    }
-  
+    }}
+    
+      // Check if the lot is fully realized 
+      if (lot.lot_status === 'FULLY REALIZED') {
+        // Log the alert and mark as error
+        console.log(`ALERT: Lot ${lot.lot_id} is fully realized. Cannot sell from it.`);
+        isError = true;
+
+        return res.status(400).json({
+          success: false,
+          msg: `Lot ${lot.lot_id} is fully realized. You cannot sell from it.`
+        });
+      }
+
+
+    if (isError) {
+      return;
+    }  
+   
       let lotsellquery;
      // query for LIFO AND FIFO
     if (method === 'LIFO') {
@@ -144,31 +170,9 @@ exports.getdata=async (req, res) => {
       for (let i = 0; i < lotval.length; i++) {
         const lot = lotval[i];
   
-        // Check if the lot is fully realized 
-        if (lot.lot_status === 'FULLY REALIZED') {
-          // Log the alert and mark as error
-          console.log(`ALERT: Lot ${lot.lot_id} is fully realized. Cannot sell from it.`);
-          isError = true;
-  
-          return res.status(400).json({
-            success: false,
-            msg: `Lot ${lot.lot_id} is fully realized. You cannot sell from it.`
-          });
-        }else{
-  
         const availableQuantity = lot.lot_quantity - lot.realized_quantity;
   
-        //  if remaining quantity exceeds available quantity
-        if (remainingQuantity > availableQuantity) {
-          console.log(`ALERT: Attempt to sell more than available in Lot ${lot.lot_id}. Available: ${availableQuantity}, Attempted to sell: ${remainingQuantity}`);
-          isError = true;
-  
-          return res.status(400).json({
-            success: false,
-            msg: `Not enough quantity in Lot ${lot.lot_id}. Available: ${availableQuantity}, Attempted to sell: ${remainingQuantity}`
-          });
-        }
-  
+       
         // Calculate the quantity to realize from this lot
         const realizeQuantity = Math.min(availableQuantity, remainingQuantity);
   
@@ -198,18 +202,11 @@ exports.getdata=async (req, res) => {
         // If remainingQuantity reaches 0, stop the loop
         if (remainingQuantity === 0) {
           break;
-        }}
+        }
       }
-  
-      if (isError) {
-        return;
-      }
-
-     
   
     } catch (error) {
       res.status(500).json({ success: false, msg: "Server error" });
     }
   };
-  
   
