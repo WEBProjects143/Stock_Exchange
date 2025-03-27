@@ -87,7 +87,7 @@ exports.getdata=async (req, res) => {
     console.log(quantity*-1> lotcheck.qty != lotcheck.rel)
 
     // checking lot status
-    if(quantity*-1>lotcheck.qty|| lotcheck.qty != lotcheck.rel ){
+    if(lotcheck.lot_quantity===lotcheck.realized_quantity){
       
       res.status(500).json({ success: false, msg: "Data not inserted" });
     }else{ 
@@ -181,7 +181,7 @@ exports.getdata=async (req, res) => {
         // If remainingQuantity reaches 0, stop the loop
         if (remainingQuantity === 0) {
           break;
-        }}
+        }
       }
   
       if (isError) {
