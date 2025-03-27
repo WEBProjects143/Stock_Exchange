@@ -23,7 +23,6 @@ if (!name || !symbol || !price || !broker || !quantity) {
 `;
   const lotValues = [ tradeRes.rows[0].trade_id,tradeRes.rows[0].quantity,0,null,'OPEN',tradeRes.rows[0].user_id,tradeRes.rows[0].symbol];
   const lotRes = await client.query(lotQuery, lotValues);
-console.log(tradeRes.rows[0].trade_id)
 res.status(201).json({
     sucess:true,
     msg:"data submitted  successfully",
@@ -38,8 +37,6 @@ exports.getdata=async (req, res) => {
       const selectQuery = 'SELECT * FROM lot';
       const result = await client.query(selectQuery);
      const data=result.rows
-     console.log(data)
-
       res.status(200).json({
         success: true,
         message: "successfull fetch Lot data",
@@ -82,19 +79,15 @@ exports.getdata=async (req, res) => {
     try {
       const { trade_id, name, quantity, broker, price, userId, symbol,method } = req.body;
 
-      const lotsellcheck = `
-      SELECT * FROM lot
-      WHERE symbol = $1 
-      ORDER BY timestamp DESC;
-    `;
+    const lotsellcheck = ` SELECT  SUM(lot_quantity) AS qty, SUM(realized_quantity) AS rel FROM lot WHERE symbol = $1 ;`;
     const lotValues = [symbol];
     const reslot = await client.query(lotsellcheck, lotValues);
     const lotcheck = reslot.rows[0];
 
-    
+    console.log(quantity*-1> lotcheck.qty != lotcheck.rel)
 
     // checking lot status
-    if(lotcheck.lot_quantity===lotcheck.realized_quantity){
+    if(quantity*-1>lotcheck.qty|| lotcheck.qty != lotcheck.rel ){
       
       res.status(500).json({ success: false, msg: "Data not inserted" });
     }else{ 
@@ -149,11 +142,6 @@ exports.getdata=async (req, res) => {
           // Log the alert and mark as error
           console.log(`ALERT: Lot ${lot.lot_id} is fully realized. Cannot sell from it.`);
           isError = true;
-  
-          return res.status(400).json({
-            success: false,
-            msg: `Lot ${lot.lot_id} is fully realized. You cannot sell from it.`
-          });
         }else{
   
         const availableQuantity = lot.lot_quantity - lot.realized_quantity;
@@ -162,11 +150,6 @@ exports.getdata=async (req, res) => {
         if (remainingQuantity > availableQuantity) {
           console.log(`ALERT: Attempt to sell more than available in Lot ${lot.lot_id}. Available: ${availableQuantity}, Attempted to sell: ${remainingQuantity}`);
           isError = true;
-  
-          return res.status(400).json({
-            success: false,
-            msg: `Not enough quantity in Lot ${lot.lot_id}. Available: ${availableQuantity}, Attempted to sell: ${remainingQuantity}`
-          });
         }
   
         // Calculate the quantity to realize from this lot
@@ -203,12 +186,11 @@ exports.getdata=async (req, res) => {
   
       if (isError) {
         return;
-      }
-
-     
+      }     
   
     } catch (error) {
-      res.status(500).json({ success: false, msg: "Server error" });
+      console.log(error)
+      res.status(500).json({ success: false, error: error });
     }
   };
   

@@ -9,9 +9,9 @@ require("dotenv").config()
         database: process.env.database, 
         password: process.env.password,
         port: process.env.port,
-        ssl: {
-          rejectUnauthorized: false,  // Allows the connection even if the certificate is self-signed
-        }
+        // ssl: {
+        //   rejectUnauthorized: false,  // Allows the connection even if the certificate is self-signed
+        // }
       });
 
       const connectDb = async () => {
