@@ -28,8 +28,10 @@ app.post("/api/v1/Login",UserLogin)
 //Mongoose routing
 const mongoRoute=require("./route/UserRoute");
 const productRoute=require("./route/productRoute");
+const orderRoute=require("./route/orderroute");
 app.use("/api/v2/",mongoRoute);
 app.use("/api/v1/",productRoute);
+app.use("/api/v1/",orderRoute);
 
 
 

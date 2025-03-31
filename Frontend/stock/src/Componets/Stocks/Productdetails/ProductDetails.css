@@ -1,0 +1,148 @@
+.product-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f8f8f8;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .product-card {
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .product-title {
+    font-size: 26px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .product-price {
+    font-size: 20px;
+    color: #27ae60;
+    font-weight: bold;
+  }
+  
+  .product-description {
+    color: #555;
+    margin: 10px 0;
+  }
+  
+  .product-images {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .product-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    transition: transform 0.3s;
+  }
+  
+  .product-image:hover {
+    transform: scale(1.1);
+  }
+  
+  .product-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
+  }
+  
+  .buy-button,
+  .cart-button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .buy-button {
+    background: #007bff;
+    color: white;
+  }
+  
+  .buy-button:hover {
+    background: #0056b3;
+  }
+  
+  .cart-button {
+    background: #28a745;
+    color: white;
+  }
+  
+  .cart-button:hover {
+    background: #1e7e34;
+  }
+  
+  .reviews-section {
+    margin-top: 30px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .reviews-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .filter-select {
+    margin-top: 10px;
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+  }
+  
+  .reviews-list {
+    margin-top: 15px;
+  }
+  
+  .review-card {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: #f9f9f9;
+    transition: box-shadow 0.3s;
+  }
+  
+  .review-card:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+  
+  .review-user {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .review-stars {
+    display: flex;
+    gap: 5px;
+    margin-top: 5px;
+  }
+  
+  .star-icon {
+    width: 18px;
+    height: 18px;
+    color: #f5c518;
+  }
+  
+  .review-comment {
+    color: #555;
+    margin-top: 5px;
+  }

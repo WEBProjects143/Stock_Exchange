@@ -186,7 +186,7 @@ exports.getdata=async (req, res) => {
   
       if (isError) {
         return;
-      }     
+      }  }   
   
     } catch (error) {
       console.log(error)

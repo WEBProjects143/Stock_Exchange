@@ -7,14 +7,26 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault();
-    if (password === confirmPassword) {
-      // Handle registration logic here
-      console.log("Registering", username, email, password);
-    } else {
-      console.log("Passwords do not match");
-    }
+
+  const userData={
+    username:username,
+    email:email,
+    password:password,
+    confirmPassword:confirmPassword
+  }
+   const data=await fetch("http://localhost:5000/api/v1/Register",{
+    method:"post",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify(userData)
+
+   })
+   if(!data.ok){
+    console.log("Frontend error while sending data")
+   }
   };
 
   return (

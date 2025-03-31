@@ -25,6 +25,8 @@
   .main-content {
     text-align: center;
     margin-top: 50px;
+    height: 50vh;
+
   }
   
   .main-content h1 {

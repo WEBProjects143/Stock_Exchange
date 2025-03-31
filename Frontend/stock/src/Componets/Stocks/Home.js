@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "../../Header/Header";
 import Footer from "../../Footer/Footer";
+import ProductList from "./products/ProductCard";
 import './Home.css';
 
 function Home() {
@@ -15,6 +16,9 @@ function Home() {
         <h1>Welcome to Our Website</h1>
         <p>Explore the best content here!</p>
       </main>
+      <section className="section-container">
+        <ProductList />
+      </section>
     <Footer/>
     </div>
   );
