@@ -4,13 +4,16 @@ const cors=require("cors")
 const cookieParser = require('cookie-parser');
 const {CreateTrade,getdata,sellstock,getTrades}=require("./Controller/Trade");
 const {UseRegistration,UserLogin}=require("./Controller/UserController")
-const app=express();
+const {Apilimitter}=require("./midllware/ApiLimitter")
 
+const app=express();
+app.use(Apilimitter);
 //Middleware
 const corsOption={"origin": process.env.ReactURL, "methods": "GET,HEAD,PUT,PATCH,POST,DELETE", credentials: true}
 app.use(cors(corsOption));
 app.use(express.json())
 app.use(cookieParser());
+
 
 //Routing
 app.post("/api/v1/stocks",(req,res)=>{
