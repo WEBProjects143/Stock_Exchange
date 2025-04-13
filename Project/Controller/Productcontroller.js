@@ -11,7 +11,7 @@ const  getAllProduct=async(req,res,next)=>{
             res.status(200).json({sucess:true,getproduct})
         } 
 //get all products by Id
-const  getProductById=async(req,res,next)=>{
+const  getProductById=async(req,res)=>{
     try {
        const getproduct=  await productModel.findById(req.params.id);
        if(!getproduct){

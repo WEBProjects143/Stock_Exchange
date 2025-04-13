@@ -15,20 +15,28 @@ exports.register=async(req,res)=>{
 }
 exports.login=async(req,res)=>{
     const{email,password}=req.body
+   
     if( !email || !password){
         return res.status(401).json({success:false,msg:"Invalid email or password"})
     }
     const userlogin=await User.findOne({email:email}).select("+password");
+
    if(!userlogin){
     return res.status(404).json({success:false,msg:"User not found"})
    }
+    
     const confirmPassword=await userlogin.comparePassword(password);
     console.log(confirmPassword)
 
     if(!confirmPassword){
         return res.status(401).json({success:false,msg:"Invalid email or password"})
+    
     }
+    req.session.isLoggedIn = true;
+    req.session.user =userlogin._id;
+  console.log("req.session.user"+ req.session.user)
     setToken(userlogin,200,res)
+    
 }
 exports.getAllUser=async(req,res)=>{
     const users=await User.find();
@@ -40,6 +48,10 @@ exports.getAllUser=async(req,res)=>{
 };
   
 exports.Logout=(req,res)=> {
+  req.session.destroy((err) => {
+    if (err) {
+      console.log(err);
+    }});
     res.cookie("token",null,{
       expires:new Date(Date.now()),
       httpOnly:true
@@ -116,4 +128,10 @@ exports.userUpdate=async(req,res,next)=>{
   })
   res.status(200).json({msg:"User updated succesfully"})
 
+}
+exports.sessionCheck=(req,res)=>{
+  if(!req.session.user){
+    return res.status(403).json({msg:"User not logged IN"})
+  }
+  res.status(200).json({user:req.session.user})
 }

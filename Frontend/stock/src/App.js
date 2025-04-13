@@ -5,10 +5,15 @@ import Login from './Componets/Stocks/login/login';
 import Register from './Componets/Stocks/Register/Register';
 import Trades from "./Componets/Stocks/StockTrade"
 import ProductCard from './Componets/Stocks/products/ProductCard';
+import PaymentForm from './Componets/Stocks/Payment/Payment';
 
 import './App.css';
 import {BrowserRouter,Routes,Route} from "react-router-dom"
 import ProductDetailPage from './Componets/Stocks/Productdetails/ProductDetails';
+import ShopHome from './React/RecactCompnenent/shoppingHome';
+import Shop from "./React/Shop/shop";
+import Navigation from './React/Navigation/Navigation';
+import SignIn from './React/SignIn/sign-in.component';
 
 function App() {
   
@@ -16,14 +21,21 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Routes>      
-            <Route path="/" element={<HomeApp />} />
+            <Route path="/" element={<HomeApp />} >
+            </Route>
             <Route path="/home" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reg" element={<Register />} />
             <Route path="/Mystocks" element={<MyStocks/>} />
             <Route path="/trades" element={<Trades/>} />
             <Route path="/product" element={<ProductCard/>} />
-            <Route path="/productdetail" element={<ProductDetailPage/>} />
+            <Route path="/productdetail/:id" element={<ProductDetailPage/>} />
+            <Route path="/PaymentForm" element={<PaymentForm/>} />
+            <Route path="/ShopHome" element={<Navigation/>} >
+            <Route index element={<ShopHome/>} />
+            <Route path="shop" element={<Shop/>} />
+            <Route path="signin" element={<SignIn/>} />
+            </Route>
   
         </Routes>
       </BrowserRouter>

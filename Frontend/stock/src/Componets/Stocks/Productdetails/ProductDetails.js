@@ -1,25 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect , useState } from "react";
+import { useParams } from "react-router-dom";
+import Loader from "../loader/loader";
 import "./ProductDetails.css";
 
-const product = {
-  name: "Sample Product",
-  price: "$99.99",
-  description: "This is a great product with amazing features.",
-  images: ["/image1.jpg", "/image2.jpg", "/image3.jpg"],
-  reviews: [
-    { id: 1, user: "Alice", rating: 5, comment: "Excellent product!" },
-    { id: 2, user: "Bob", rating: 4, comment: "Very good, but could be cheaper." },
-    { id: 3, user: "Charlie", rating: 3, comment: "Average, expected more." },
-  ],
-};
-
 export default function ProductDetailPage() {
+  const { id } = useParams();
   const [filter, setFilter] = useState("all");
-  const filteredReviews =
-    filter === "all"
-      ? product.reviews
-      : product.reviews.filter((r) => r.rating.toString() === filter);
+  const [reviews, setReviews] = useState();
+  const [product, setProduct] = useState(null); // Initialize as null
+  const [loading, setLoading] = useState(true); // Add loading state
 
+    useEffect(() => {
+      const fetchProduct = async () => {
+            try {
+              const res = await fetch(`http://localhost:5000/api/v1/getbyId/${id}`);
+              const data = await res.json();
+
+              const result=data.getproduct;
+  
+              setProduct(result);
+              setReviews(result.reviews)
+            } catch (error) {
+              console.error("Error fetching product:", error);
+            }
+            finally {
+              setLoading(false);
+            }
+          };
+          fetchProduct();
+           
+        }, [id]);
+ 
+        // const reviews= product.reviews===null ? []:product.reviews
+        // console.log("reviews"+reviews)
+        const filteredReviews = 
+        filter === "all"
+         ?reviews
+         :reviews.filter((r) => r.rating.toString() === filter)    
+  
+
+      if (loading) return <div><Loader/></div>;
   return (
     <div className="product-container">
       <div className="product-card">
@@ -47,7 +67,7 @@ export default function ProductDetailPage() {
         <div className="reviews-list">
           {filteredReviews.map((review) => (
             <div key={review.id} className="review-card">
-              <p className="review-user">{review.user}</p>
+              <p className="review-user">{review.name}</p>
               <div className="review-stars">
               </div>
               <p className="review-comment">{review.comment}</p>
