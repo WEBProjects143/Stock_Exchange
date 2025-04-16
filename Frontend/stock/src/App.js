@@ -14,6 +14,9 @@ import ShopHome from './React/RecactCompnenent/shoppingHome';
 import Shop from "./React/Shop/shop";
 import Navigation from './React/Navigation/Navigation';
 import SignIn from './React/SignIn/sign-in.component';
+import Cards from './React/CardComponent/Card';
+import CardsDetails from './React/CardComponent/CardsDetails';
+import SignUpForm from './React/SignIn/sign-up-form.component';
 
 function App() {
   
@@ -31,12 +34,14 @@ function App() {
             <Route path="/product" element={<ProductCard/>} />
             <Route path="/productdetail/:id" element={<ProductDetailPage/>} />
             <Route path="/PaymentForm" element={<PaymentForm/>} />
-            <Route path="/ShopHome" element={<Navigation/>} >
-            <Route index element={<ShopHome/>} />
-            <Route path="shop" element={<Shop/>} />
-            <Route path="signin" element={<SignIn/>} />
+            <Route path="/ShopHome" element={<Navigation />}>
+              <Route index element={<ShopHome />} />
+              <Route path="shop" element={<Shop />} />
+              <Route path="signin" element={<SignIn />} />
+              <Route path="cards" element={<Cards />} />
+              <Route path="carddetails" element={<CardsDetails />} />
+              <Route path="SignUpForm" element={<SignUpForm />} />
             </Route>
-  
         </Routes>
       </BrowserRouter>
     </div>
